@@ -53,7 +53,6 @@ def SIDBinToString(binary):
     assert version == 1, version
     length = struct.unpack('B', binary[1])[0]
     authority = struct.unpack('>Q', '\x00\x00' + binary[2:8])[0]
-    print ["***"]+[binary[2:8]]
     string = 'S-%d-%d' % (version, authority)
     binary = binary[8:]
     assert len(binary) == 4 * length
@@ -109,6 +108,30 @@ def sidtoid(sid):
         print e
         sys.exit(1)
 
+def idtosid(objecttype,objectid):
+    try:
+        l = connectad()
+        attributes = ["objectSid"]
+        if objecttype == "UID":
+            search_filter = "(&(uidNumber=%s)(objectClass=user))" % objectid
+        else:
+            search_filter = "(&(gidNumber=%s)(objectClass=group))" % objectid
+        result = l.search_s("dc=ads,dc=bris,dc=ac,dc=uk", ldap.SCOPE_SUBTREE,
+                            search_filter, attributes)[0]
+        if result[0] != None:
+            sid = SIDBinToString(result[1]["objectSid"][0])
+            return "SID:%s" % sid
+        else:
+            r = l.search_s("dc=ads,dc=bris,dc=ac,dc=uk", ldap.SCOPE_SUBTREE,
+                            "(objectClass=domain)", ["objectSid"])[0][1]
+            sid=SIDBinToString(r["objectSid"][0])
+            sid += "-" + str(objectid-10000000)
+            return "SID:%s" % sid
+
+    except ldap.LDAPError, e:
+        print e
+        sys.exit(1)
+
 
 
 def idmap():
@@ -118,14 +141,14 @@ def idmap():
     sidtoid_parser.add_argument('sid', help='SID')
     idtosid_parser = subparsers.add_parser('IDTOSID')
     idtosid_parser.add_argument('type', help="UID or GID")
-    idtosid_parser.add_argument('id', help="ID")
+    idtosid_parser.add_argument('id', help="ID", type=int)
     args = parser.parse_args()
 
 
     if args.action == "SIDTOID":
         print sidtoid(args.sid)
     elif args.action == "IDTOSID":
-        print "Not implemented"
+        print idtosid(args.type,args.id)
 
 if __name__ == '__main__':
     idmap()
