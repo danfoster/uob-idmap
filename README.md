@@ -1,6 +1,6 @@
 # Custom Samba IDMAP Script for UoB
 
-The script `idmap.py` provides a suitable `SID<->UID/GID` for Users and Groups in Active Directory at the University of Bristol. It is compatible with the (`idmap_tdb2`)[https://www.samba.org/samba/docs/man/manpages/idmap_tdb2.8.html] backend. 
+The script `idmap.py` provides a suitable `SID<->UID/GID` for Users and Groups in Active Directory at the University of Bristol. It is compatible with the [`idmap_tdb2`](https://www.samba.org/samba/docs/man/manpages/idmap_tdb2.8.html) backend. 
 
 ## Usage
 
@@ -11,7 +11,7 @@ A service user is required to bind to the AD LDAP interface. This should be defi
 ```
 ---
 adusername: serviceuser@ad.example.com
-adpassword: ******<F3>
+adpassword: ******
 adserver: ldap://ad.example.com
 ```
 
